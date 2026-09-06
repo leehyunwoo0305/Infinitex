@@ -17,7 +17,8 @@ import {
   VscExtensions,
   VscDebugAlt,
   VscSettings,
-  VscFilePdf
+  VscFilePdf,
+  VscTools
 } from 'react-icons/vsc';
 import { useStore } from '../../store/useStore';
 import { ThemeSettings } from '../Settings/ThemeSettings';
@@ -33,6 +34,8 @@ export const MenuBar: React.FC = () => {
     toggleTerminal,
     gitPanelOpen,
     toggleGitPanel,
+    toolsOpen,
+    toggleTools,
     setFiles,
     workspacePath
   } = useStore();
@@ -188,6 +191,28 @@ export const MenuBar: React.FC = () => {
         </div>
         <div className="menu-item">Run</div>
         <div className="menu-item">Terminal</div>
+        <div 
+          className="menu-item"
+          onClick={() => setActiveMenu(activeMenu === 'tools' ? null : 'tools')}
+          onMouseEnter={() => activeMenu && setActiveMenu('tools')}
+        >
+          Tools
+          {activeMenu === 'tools' && (
+            <div className="menu-dropdown">
+              <div onClick={toggleTools}>Developer Tools</div>
+              <div className="menu-separator" />
+              <div>JSON/YAML Editor</div>
+              <div>Markdown Preview</div>
+              <div>Regex Tester</div>
+              <div>Snippet Manager</div>
+              <div>Log Viewer</div>
+              <div>API Client</div>
+              <div>Package Manager</div>
+              <div>Database Viewer</div>
+              <div>Docker Manager</div>
+            </div>
+          )}
+        </div>
         <div className="menu-item">Help</div>
         
         <div style={{ flex: 1 }} />
@@ -239,6 +264,14 @@ export const MenuBar: React.FC = () => {
             title="Toggle Terminal"
           >
             <VscTerminal />
+          </button>
+          
+          <button 
+            className={`toolbar-button ${toolsOpen ? 'active' : ''}`}
+            onClick={toggleTools}
+            title="Developer Tools"
+          >
+            <VscTools />
           </button>
           
           <button 

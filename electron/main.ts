@@ -393,3 +393,90 @@ ipcMain.handle('git-init', async (_event, cwd: string) => {
   const result = await gitExec(['init'], cwd);
   return { success: result.success, stdout: result.stdout, error: result.stderr };
 });
+
+// Git branch operations
+ipcMain.handle('git-branch-list', async (_event, cwd: string) => {
+  const result = await gitExec(['branch', '-a', '--format=%(refname:short)|%(HEAD)'], cwd);
+  if (!result.success) return { success: false, error: result.stderr, branches: [] };
+
+  const branches = result.stdout.split('\n').filter(Boolean).map((line) => {
+    const [name, isHead] = line.split('|');
+    return { name, isCurrent: isHead === 'true' || name.startsWith('*') };
+  });
+
+  return { success: true, branches };
+});
+
+ipcMain.handle('git-branch-create', async (_event, branchName: string, cwd: string) => {
+  const result = await gitExec(['branch', branchName], cwd);
+  return { success: result.success, error: result.stderr };
+});
+
+ipcMain.handle('git-branch-delete', async (_event, branchName: string, cwd: string) => {
+  const result = await gitExec(['branch', '-D', branchName], cwd);
+  return { success: result.success, error: result.stderr };
+});
+
+ipcMain.handle('git-branch-switch', async (_event, branchName: string, cwd: string) => {
+  const result = await gitExec(['checkout', branchName], cwd);
+  return { success: result.success, error: result.stderr };
+});
+
+// Git stash operations
+ipcMain.handle('git-stash', async (_event, message: string, cwd: string) => {
+  const args = message ? ['stash', 'push', '-m', message] : ['stash', 'push'];
+  const result = await gitExec(args, cwd);
+  return { success: result.success, stdout: result.stdout, error: result.stderr };
+});
+
+ipcMain.handle('git-stash-pop', async (_event, cwd: string) => {
+  const result = await gitExec(['stash', 'pop'], cwd);
+  return { success: result.success, stdout: result.stdout, error: result.stderr };
+});
+
+ipcMain.handle('git-stash-list', async (_event, cwd: string) => {
+  const result = await gitExec(['stash', 'list', '--pretty=format:%gd|%s|%H'], cwd);
+  if (!result.success) return { success: false, error: result.stderr, stashes: [] };
+
+  const stashes = result.stdout.split('\n').filter(Boolean).map((line) => {
+    const [ref, message, hash] = line.split('|');
+    return { ref, message, hash };
+  });
+
+  return { success: true, stashes };
+});
+
+ipcMain.handle('git-stash-drop', async (_event, stashRef: string, cwd: string) => {
+  const result = await gitExec(['stash', 'drop', stashRef], cwd);
+  return { success: result.success, error: result.stderr };
+});
+
+// Git merge
+ipcMain.handle('git-merge', async (_event, branchName: string, cwd: string) => {
+  const result = await gitExec(['merge', branchName], cwd);
+  return { success: result.success, stdout: result.stdout, error: result.stderr };
+});
+
+// Git pull/push
+ipcMain.handle('git-pull', async (_event, cwd: string) => {
+  const result = await gitExec(['pull'], cwd);
+  return { success: result.success, stdout: result.stdout, error: result.stderr };
+});
+
+ipcMain.handle('git-push', async (_event, cwd: string) => {
+  const result = await gitExec(['push'], cwd);
+  return { success: result.success, stdout: result.stdout, error: result.stderr };
+});
+
+// Git remote
+ipcMain.handle('git-remote', async (_event, cwd: string) => {
+  const result = await gitExec(['remote', '-v'], cwd);
+  if (!result.success) return { success: false, error: result.stderr, remotes: [] };
+
+  const remotes = result.stdout.split('\n').filter(Boolean).map((line) => {
+    const [name, url] = line.split(/\s+/);
+    return { name, url };
+  });
+
+  return { success: true, remotes };
+});

@@ -43,6 +43,66 @@ interface ElectronAPI {
   }>;
   getPlatform: () => Promise<string>;
 
+  // Terminal
+  terminalExec: (command: string, cwd?: string) => Promise<{
+    success: boolean;
+    stdout: string;
+    stderr: string;
+    error: string | null;
+    code: number | undefined;
+  }>;
+  terminalGetCwd: () => Promise<string>;
+
+  // Git
+  gitStatus: (cwd: string) => Promise<{
+    success: boolean;
+    files: Array<{ path: string; status: string; indexStatus: string; workTreeStatus: string }>;
+    error?: string;
+  }>;
+  gitBranch: (cwd: string) => Promise<{ success: boolean; branch: string; error?: string }>;
+  gitCommit: (message: string, cwd: string) => Promise<{ success: boolean; stdout?: string; error?: string }>;
+  gitLog: (cwd: string, count?: number) => Promise<{
+    success: boolean;
+    entries: Array<{ hash: string; subject: string; author: string; date: string }>;
+    error?: string;
+  }>;
+  gitDiff: (filePath: string, cwd: string) => Promise<{ success: boolean; diff: string; error?: string }>;
+  gitInit: (cwd: string) => Promise<{ success: boolean; stdout?: string; error?: string }>;
+
+  // Git branch operations
+  gitBranchList: (cwd: string) => Promise<{
+    success: boolean;
+    branches: Array<{ name: string; isCurrent: boolean }>;
+    error?: string;
+  }>;
+  gitBranchCreate: (branchName: string, cwd: string) => Promise<{ success: boolean; error?: string }>;
+  gitBranchDelete: (branchName: string, cwd: string) => Promise<{ success: boolean; error?: string }>;
+  gitBranchSwitch: (branchName: string, cwd: string) => Promise<{ success: boolean; error?: string }>;
+
+  // Git stash operations
+  gitStash: (message: string, cwd: string) => Promise<{ success: boolean; stdout?: string; error?: string }>;
+  gitStashPop: (cwd: string) => Promise<{ success: boolean; stdout?: string; error?: string }>;
+  gitStashList: (cwd: string) => Promise<{
+    success: boolean;
+    stashes: Array<{ ref: string; message: string; hash: string }>;
+    error?: string;
+  }>;
+  gitStashDrop: (stashRef: string, cwd: string) => Promise<{ success: boolean; error?: string }>;
+
+  // Git merge
+  gitMerge: (branchName: string, cwd: string) => Promise<{ success: boolean; stdout?: string; error?: string }>;
+
+  // Git pull/push
+  gitPull: (cwd: string) => Promise<{ success: boolean; stdout?: string; error?: string }>;
+  gitPush: (cwd: string) => Promise<{ success: boolean; stdout?: string; error?: string }>;
+
+  // Git remote
+  gitRemote: (cwd: string) => Promise<{
+    success: boolean;
+    remotes: Array<{ name: string; url: string }>;
+    error?: string;
+  }>;
+
   // Auto-update
   updateCheck: () => Promise<{ success: boolean; updateAvailable?: boolean; version?: string; error?: string }>;
   updateDownload: () => Promise<{ success: boolean; error?: string }>;

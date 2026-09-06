@@ -7,11 +7,13 @@ interface AppState {
   files: FileNode[];
   openTabs: Tab[];
   activeTabId: string | null;
+  activeFile: string | null;
   activeTheme: Theme;
   viewMode: ViewMode;
   sidebarOpen: boolean;
   terminalOpen: boolean;
   gitPanelOpen: boolean;
+  toolsOpen: boolean;
   workspacePath: string | null;
   
   setFiles: (files: FileNode[]) => void;
@@ -24,6 +26,7 @@ interface AppState {
   toggleSidebar: () => void;
   toggleTerminal: () => void;
   toggleGitPanel: () => void;
+  toggleTools: () => void;
   setWorkspacePath: (path: string) => void;
   loadWorkspace: (dirPath: string) => Promise<void>;
   loadChildren: (nodeId: string, dirPath: string) => Promise<void>;
@@ -64,11 +67,13 @@ export const useStore = create<AppState>()(
       files: initialFiles,
       openTabs: [],
       activeTabId: null,
+      activeFile: null,
       activeTheme: defaultTheme,
       viewMode: 'editor',
       sidebarOpen: true,
       terminalOpen: true,
       gitPanelOpen: false,
+      toolsOpen: false,
       workspacePath: null,
   
   setFiles: (files) => set({ files }),
@@ -76,7 +81,7 @@ export const useStore = create<AppState>()(
   openFile: (file) => set((state) => {
     const existingTab = state.openTabs.find(tab => tab.fileId === file.id);
     if (existingTab) {
-      return { activeTabId: existingTab.id };
+      return { activeTabId: existingTab.id, activeFile: file.path || null };
     }
     
     const newTab: Tab = {
@@ -90,6 +95,7 @@ export const useStore = create<AppState>()(
     return {
       openTabs: [...state.openTabs, newTab],
       activeTabId: newTab.id,
+      activeFile: file.path || null,
     };
   }),
   
@@ -119,6 +125,7 @@ export const useStore = create<AppState>()(
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
   toggleTerminal: () => set((state) => ({ terminalOpen: !state.terminalOpen })),
   toggleGitPanel: () => set((state) => ({ gitPanelOpen: !state.gitPanelOpen })),
+  toggleTools: () => set((state) => ({ toolsOpen: !state.toolsOpen })),
   
   setWorkspacePath: (path) => set({ workspacePath: path }),
   

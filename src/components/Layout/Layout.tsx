@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { MenuBar } from '../Header/MenuBar';
 import { StatusBar } from '../Header/StatusBar';
 import { FileExplorer } from '../Sidebar/FileExplorer';
-import { GitPanel } from '../Git/GitPanel';
+import { GitGUI } from '../Git/GitGUI';
 import { CodeEditor } from '../Editor/CodeEditor';
 import { Terminal } from '../Terminal/Terminal';
 import { LivePreview } from '../Preview/LivePreview';
 import { PDFViewer } from '../PDF/PDFViewer';
 import { UpdateNotification } from '../Update/UpdateNotification';
+import { ToolsPanel } from '../Tools/ToolsPanel';
 import { useStore } from '../../store/useStore';
 import '../../styles/global.scss';
 
@@ -31,7 +32,7 @@ export const Layout: React.FC = () => {
       
       <div className="main-content">
         {sidebarOpen && <FileExplorer />}
-        {gitPanelOpen && <GitPanel />}
+        {gitPanelOpen && <GitGUI />}
         
         <div className="editor-area">
           <div className="split-view">
@@ -52,6 +53,7 @@ export const Layout: React.FC = () => {
       
       <StatusBar />
       <UpdateNotification />
+      <ToolsPanel />
     </div>
   );
 };
