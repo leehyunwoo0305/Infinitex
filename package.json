@@ -1,0 +1,95 @@
+{
+  "name": "infinitex",
+  "private": true,
+  "version": "1.0.0",
+  "main": "dist-electron/main.js",
+  "author": "Infinitex Team",
+  "description": "A modern code editor for developers",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "electron:dev": "concurrently \"vite\" \"tsc -b && wait-on http://localhost:5173 && electron .\"",
+    "electron:build": "vite build && tsc -b && electron-builder",
+    "electron:build:win": "vite build && tsc -b && electron-builder --win",
+    "electron:build:mac": "vite build && tsc -b && electron-builder --mac",
+    "electron:build:linux": "vite build && tsc -b && electron-builder --linux",
+    "electron:build:publish": "vite build && tsc -b && electron-builder --win --publish always"
+  },
+  "build": {
+    "appId": "com.infinitex.app",
+    "productName": "Infinitex",
+    "directories": {
+      "output": "release"
+    },
+    "electronDownload": {
+      "cache": "C:\\Users\\user\\.electron-cache"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "public/**/*"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "public/icon.ico"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "icon": "public/icon.icns"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "icon": "public/icon.png"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": false,
+      "shortcutName": "Infinitex"
+    },
+    "npmRebuild": false,
+    "publish": {
+      "provider": "github",
+      "owner": "leehyunwoo0305",
+      "repo": "Infinitex"
+    }
+  },
+  "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/addon-web-links": "^0.12.0",
+    "@xterm/xterm": "^6.0.0",
+    "electron-updater": "^6.8.9",
+    "isomorphic-git": "^1.30.0",
+    "pdfjs-dist": "^4.10.38",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-icons": "^5.7.0",
+    "sass": "^1.103.1",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.1.0",
+    "concurrently": "^9.2.4",
+    "electron": "^35.4.0",
+    "electron-builder": "^26.0.12",
+    "oxlint": "^1.79.0",
+    "sharp": "^0.35.4",
+    "typescript": "~6.0.2",
+    "vite": "^8.2.2",
+    "wait-on": "^8.0.5"
+  }
+}

@@ -1,0 +1,108 @@
+import type { Theme } from '../types';
+
+export const themes: Theme[] = [
+  {
+    id: 'dark',
+    name: 'Dark',
+    colors: {
+      background: '#1e1e1e',
+      foreground: '#d4d4d4',
+      sidebar: '#252526',
+      editor: '#1e1e1e',
+      terminal: '#1e1e1e',
+      border: '#3c3c3c',
+      accent: '#007acc',
+    },
+  },
+  {
+    id: 'monokai',
+    name: 'Monokai',
+    colors: {
+      background: '#272822',
+      foreground: '#f8f8f2',
+      sidebar: '#1e1f1c',
+      editor: '#272822',
+      terminal: '#272822',
+      border: '#49483e',
+      accent: '#a6e22e',
+    },
+  },
+  {
+    id: 'dracula',
+    name: 'Dracula',
+    colors: {
+      background: '#282a36',
+      foreground: '#f8f8f2',
+      sidebar: '#21222c',
+      editor: '#282a36',
+      terminal: '#282a36',
+      border: '#44475a',
+      accent: '#bd93f9',
+    },
+  },
+  {
+    id: 'solarized-dark',
+    name: 'Solarized Dark',
+    colors: {
+      background: '#002b36',
+      foreground: '#839496',
+      sidebar: '#073642',
+      editor: '#002b36',
+      terminal: '#002b36',
+      border: '#073642',
+      accent: '#268bd2',
+    },
+  },
+  {
+    id: 'nord',
+    name: 'Nord',
+    colors: {
+      background: '#2e3440',
+      foreground: '#d8dee9',
+      sidebar: '#2e3440',
+      editor: '#2e3440',
+      terminal: '#2e3440',
+      border: '#3b4252',
+      accent: '#88c0d0',
+    },
+  },
+  {
+    id: 'github-dark',
+    name: 'GitHub Dark',
+    colors: {
+      background: '#0d1117',
+      foreground: '#c9d1d9',
+      sidebar: '#161b22',
+      editor: '#0d1117',
+      terminal: '#0d1117',
+      border: '#30363d',
+      accent: '#58a6ff',
+    },
+  },
+  {
+    id: 'one-dark',
+    name: 'One Dark',
+    colors: {
+      background: '#282c34',
+      foreground: '#abb2bf',
+      sidebar: '#21252b',
+      editor: '#282c34',
+      terminal: '#282c34',
+      border: '#3e4451',
+      accent: '#61afef',
+    },
+  },
+  {
+    id: 'ayu-dark',
+    name: 'Ayu Dark',
+    colors: {
+      background: '#0b1416',
+      foreground: '#bfbdb6',
+      sidebar: '#0a0e10',
+      editor: '#0b1416',
+      terminal: '#0b1416',
+      border: '#1f2430',
+      accent: '#39bae6',
+    },
+  },
+];
