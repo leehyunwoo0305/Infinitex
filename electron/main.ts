@@ -292,7 +292,7 @@ ipcMain.handle('update-check', async () => {
 
 ipcMain.handle('update-download', async () => {
   try {
-    await autoUpdater.checkForUpdates();
+    autoUpdater.downloadUpdate();
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };
