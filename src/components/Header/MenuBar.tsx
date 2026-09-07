@@ -18,10 +18,14 @@ import {
   VscDebugAlt,
   VscSettings,
   VscFilePdf,
-  VscTools
+  VscTools,
+  VscPerson,
+  VscSignIn
 } from 'react-icons/vsc';
 import { useStore } from '../../store/useStore';
 import { ThemeSettings } from '../Settings/ThemeSettings';
+import { AuthModal } from '../Auth/AuthModal';
+import { useAuth } from '../../contexts/AuthContext';
 import { windowControls, isElectronApp, dialog, fileSystem, detectLanguage } from '../../utils/electron';
 
 export const MenuBar: React.FC = () => {
@@ -37,9 +41,13 @@ export const MenuBar: React.FC = () => {
     toolsOpen,
     toggleTools,
     setFiles,
-    workspacePath
+    workspacePath,
+    authOpen,
+    setAuthOpen,
+    authMode
   } = useStore();
   
+  const { user, isEmailVerified } = useAuth();
   const [themeSettingsOpen, setThemeSettingsOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
@@ -263,6 +271,29 @@ export const MenuBar: React.FC = () => {
           >
             <VscSettingsGear />
           </button>
+
+          {user ? (
+            <button 
+              className="toolbar-button"
+              onClick={() => setAuthOpen(true, 'login')}
+              title={user.displayName || user.email || "Account"}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <VscPerson size={14} />
+              <span style={{ fontSize: '12px', maxWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {user.displayName || user.email?.split('@')[0]}
+              </span>
+              {!isEmailVerified && <span style={{ color: '#fcc419', fontSize: '8px' }}>●</span>}
+            </button>
+          ) : (
+            <button 
+              className="toolbar-button"
+              onClick={() => setAuthOpen(true, 'login')}
+              title="Login / Sign Up"
+            >
+              <VscSignIn />
+            </button>
+          )}
         </div>
 
         {isElectronApp && (
@@ -298,6 +329,12 @@ export const MenuBar: React.FC = () => {
       <ThemeSettings 
         isOpen={themeSettingsOpen} 
         onClose={() => setThemeSettingsOpen(false)} 
+      />
+      
+      <AuthModal 
+        isOpen={authOpen} 
+        onClose={() => setAuthOpen(false)}
+        initialMode={authMode}
       />
     </>
   );

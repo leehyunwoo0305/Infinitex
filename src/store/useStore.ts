@@ -15,6 +15,8 @@ interface AppState {
   gitPanelOpen: boolean;
   toolsOpen: boolean;
   workspacePath: string | null;
+  authOpen: boolean;
+  authMode: 'login' | 'signup';
   
   setFiles: (files: FileNode[]) => void;
   openFile: (file: FileNode) => void;
@@ -28,6 +30,7 @@ interface AppState {
   toggleGitPanel: () => void;
   toggleTools: () => void;
   setWorkspacePath: (path: string) => void;
+  setAuthOpen: (open: boolean, mode?: 'login' | 'signup') => void;
   loadWorkspace: (dirPath: string) => Promise<void>;
   loadChildren: (nodeId: string, dirPath: string) => Promise<void>;
   saveFile: (fileId: string) => Promise<void>;
@@ -75,6 +78,8 @@ export const useStore = create<AppState>()(
       gitPanelOpen: false,
       toolsOpen: false,
       workspacePath: null,
+      authOpen: false,
+      authMode: 'login',
   
   setFiles: (files) => set({ files }),
   
@@ -126,6 +131,7 @@ export const useStore = create<AppState>()(
   toggleTerminal: () => set((state) => ({ terminalOpen: !state.terminalOpen })),
   toggleGitPanel: () => set((state) => ({ gitPanelOpen: !state.gitPanelOpen })),
   toggleTools: () => set((state) => ({ toolsOpen: !state.toolsOpen })),
+  setAuthOpen: (open, mode = 'login') => set({ authOpen: open, authMode: mode }),
   
   setWorkspacePath: (path) => set({ workspacePath: path }),
   
