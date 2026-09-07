@@ -99,36 +99,7 @@ export const MenuBar: React.FC = () => {
   return (
     <>
       <div className="menu-bar">
-        {isElectronApp && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginRight: '8px' }}>
-            <button 
-              className="toolbar-button"
-              onClick={windowControls.minimize}
-              title="Minimize"
-              style={{ width: '28px', height: '28px' }}
-            >
-              <VscChromeMinimize size={12} />
-            </button>
-            <button 
-              className="toolbar-button"
-              onClick={windowControls.maximize}
-              title="Maximize"
-              style={{ width: '28px', height: '28px' }}
-            >
-              <VscChromeMaximize size={12} />
-            </button>
-            <button 
-              className="toolbar-button"
-              onClick={windowControls.close}
-              title="Close"
-              style={{ width: '28px', height: '28px' }}
-            >
-              <VscClose size={12} />
-            </button>
-          </div>
-        )}
-        
-          <div 
+        <div 
           className="menu-item"
           onClick={() => setActiveMenu(activeMenu === 'file' ? null : 'file')}
           onMouseEnter={() => activeMenu && setActiveMenu('file')}
@@ -210,6 +181,17 @@ export const MenuBar: React.FC = () => {
               <div>Package Manager</div>
               <div>Database Viewer</div>
               <div>Docker Manager</div>
+              <div>File Converter</div>
+              <div className="menu-separator" />
+              <div>Minifier</div>
+              <div>Encoder/Decoder</div>
+              <div>Test Data Generator</div>
+              <div>QR Code Generator</div>
+              <div>Timer/Pomodoro</div>
+              <div>ASCII Art</div>
+              <div>Color Picker</div>
+              <div>Calculator</div>
+              <div>Network Tools</div>
             </div>
           )}
         </div>
@@ -282,6 +264,35 @@ export const MenuBar: React.FC = () => {
             <VscSettingsGear />
           </button>
         </div>
+
+        {isElectronApp && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginLeft: '8px' }}>
+            <button 
+              className="toolbar-button"
+              onClick={windowControls.minimize}
+              title="Minimize"
+              style={{ width: '28px', height: '28px' }}
+            >
+              <VscChromeMinimize size={12} />
+            </button>
+            <button 
+              className="toolbar-button"
+              onClick={windowControls.maximize}
+              title="Maximize"
+              style={{ width: '28px', height: '28px' }}
+            >
+              <VscChromeMaximize size={12} />
+            </button>
+            <button 
+              className="toolbar-button"
+              onClick={windowControls.close}
+              title="Close"
+              style={{ width: '28px', height: '28px' }}
+            >
+              <VscClose size={12} />
+            </button>
+          </div>
+        )}
       </div>
       
       <ThemeSettings 

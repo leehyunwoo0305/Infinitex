@@ -9,7 +9,16 @@ import {
   VscPackage,
   VscDatabase,
   VscServer,
-  VscClose
+  VscClose,
+  VscFile,
+  VscTools,
+  VscLock,
+  VscListFlat,
+  VscDeviceMobile,
+  VscDebug,
+  VscWatch,
+  VscColorMode,
+  VscGlobe
 } from 'react-icons/vsc';
 import { JsonYamlEditor } from '../Editors/JsonYamlEditor';
 import { MarkdownPreview } from '../Preview/MarkdownPreview';
@@ -20,9 +29,19 @@ import { ApiTester } from './ApiTester';
 import { PackageManagerUI } from './PackageManagerUI';
 import { DatabaseViewer } from './DatabaseViewer';
 import { DockerManager } from './DockerManager';
+import { FileConverter } from './FileConverter';
+import { Minifier } from './Minifier';
+import { EncoderDecoder } from './EncoderDecoder';
+import { TestDataGenerator } from './TestDataGenerator';
+import { QRCodeGenerator } from './QRCodeGenerator';
+import { TimerApp } from './TimerApp';
+import { AsciiArtGenerator } from './AsciiArtGenerator';
+import { ColorPicker } from './ColorPicker';
+import { Calculator } from './Calculator';
+import { NetworkTools } from './NetworkTools';
 import { useStore } from '../../store/useStore';
 
-type ToolTab = 'json' | 'markdown' | 'regex' | 'snippets' | 'logs' | 'api' | 'packages' | 'database' | 'docker';
+type ToolTab = 'json' | 'markdown' | 'regex' | 'snippets' | 'logs' | 'api' | 'packages' | 'database' | 'docker' | 'converter' | 'minifier' | 'encoder' | 'testdata' | 'qrcode' | 'timer' | 'ascii' | 'colorpicker' | 'calculator' | 'network';
 
 interface Tool {
   id: ToolTab;
@@ -45,6 +64,16 @@ export const ToolsPanel: React.FC = () => {
     { id: 'packages', name: 'Packages', icon: <VscPackage size={16} />, component: <PackageManagerUI /> },
     { id: 'database', name: 'Database', icon: <VscDatabase size={16} />, component: <DatabaseViewer /> },
     { id: 'docker', name: 'Docker', icon: <VscServer size={16} />, component: <DockerManager /> },
+    { id: 'converter', name: 'Converter', icon: <VscFile size={16} />, component: <FileConverter /> },
+    { id: 'minifier', name: 'Minifier', icon: <VscTools size={16} />, component: <Minifier /> },
+    { id: 'encoder', name: 'Encoder', icon: <VscLock size={16} />, component: <EncoderDecoder /> },
+    { id: 'testdata', name: 'Test Data', icon: <VscListFlat size={16} />, component: <TestDataGenerator /> },
+    { id: 'qrcode', name: 'QR Code', icon: <VscDeviceMobile size={16} />, component: <QRCodeGenerator /> },
+    { id: 'timer', name: 'Timer', icon: <VscWatch size={16} />, component: <TimerApp /> },
+    { id: 'ascii', name: 'ASCII Art', icon: <VscFile size={16} />, component: <AsciiArtGenerator /> },
+    { id: 'colorpicker', name: 'Color Picker', icon: <VscColorMode size={16} />, component: <ColorPicker /> },
+    { id: 'calculator', name: 'Calculator', icon: <VscTools size={16} />, component: <Calculator /> },
+    { id: 'network', name: 'Network', icon: <VscGlobe size={16} />, component: <NetworkTools /> },
   ];
 
   if (!toolsOpen) return null;
