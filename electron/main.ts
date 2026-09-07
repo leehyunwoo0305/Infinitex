@@ -63,7 +63,10 @@ function createWindow() {
         releaseDate: info.releaseDate,
       });
     });
-    autoUpdater.on('error', () => {});
+    autoUpdater.on('error', (error) => {
+      console.error('Auto-update error:', error);
+      mainWindow?.webContents.send('update-error', error.message);
+    });
 
     setTimeout(() => {
       autoUpdater.checkForUpdates().catch(() => {});
