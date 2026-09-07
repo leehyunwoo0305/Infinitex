@@ -116,6 +116,35 @@ interface ElectronAPI {
   onUpdateDownloadProgress: (callback: (progress: { percent: number; transferred: number; total: number }) => void) => void;
   onUpdateDownloaded: (callback: (info: { version: string; releaseDate: string }) => void) => void;
   onUpdateError: (callback: (error: string) => void) => void;
+
+  // Auth
+  authRegister: (email: string, password: string, displayName: string) => Promise<{
+    success: boolean;
+    user?: { uid: string; email: string; displayName: string; emailVerified: boolean };
+    verificationCode?: string;
+    error?: string;
+  }>;
+  authLogin: (email: string, password: string) => Promise<{
+    success: boolean;
+    user?: { uid: string; email: string; displayName: string; emailVerified: boolean };
+    error?: string;
+  }>;
+  authVerifyEmail: (email: string, code: string) => Promise<{
+    success: boolean;
+    user?: { uid: string; email: string; displayName: string; emailVerified: boolean };
+    error?: string;
+  }>;
+  authResendVerification: (email: string) => Promise<{
+    success: boolean;
+    verificationCode?: string;
+    error?: string;
+  }>;
+  authGetUser: (email: string) => Promise<{
+    success: boolean;
+    user?: { uid: string; email: string; displayName: string; emailVerified: boolean };
+    error?: string;
+  }>;
+  authLogout: () => Promise<{ success: boolean }>;
 }
 
 declare global {

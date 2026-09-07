@@ -1,66 +1,64 @@
-import { initializeApp } from 'firebase/app';
-import { 
-  getAuth, 
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  sendEmailVerification,
-  onAuthStateChanged,
-  updateProfile
-} from 'firebase/auth';
-import type { User } from 'firebase/auth';
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDemo-ReplaceWithYourKey",
-  authDomain: "infinitex-editor.firebaseapp.com",
-  projectId: "infinitex-editor",
-  storageBucket: "infinitex-editor.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abcdef123456"
-};
-
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+import { auth as electronAuth } from '../utils/electron';
 
 export interface AuthUser {
   uid: string;
-  email: string | null;
-  displayName: string | null;
+  email: string;
+  displayName: string;
   emailVerified: boolean;
 }
 
-export const convertUser = (user: User | null): AuthUser | null => {
-  if (!user) return null;
-  return {
-    uid: user.uid,
-    email: user.email,
-    displayName: user.displayName,
-    emailVerified: user.emailVerified
-  };
-};
+let currentUser: AuthUser | null = null;
+let authStateCallbacks: ((user: AuthUser | null) => void)[] = [];
 
 export const registerUser = async (email: string, password: string, displayName: string) => {
-  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-  await updateProfile(userCredential.user, { displayName });
-  await sendEmailVerification(userCredential.user);
-  return convertUser(userCredential.user);
+  const result = await electronAuth.register(email, password, displayName);
+  if (!result.success) {
+    throw new Error(result.error);
+  }
+  currentUser = result.user!;
+  authStateCallbacks.forEach(cb => cb(currentUser));
+  return currentUser;
 };
 
 export const loginUser = async (email: string, password: string) => {
-  const userCredential = await signInWithEmailAndPassword(auth, email, password);
-  return convertUser(userCredential.user);
+  const result = await electronAuth.login(email, password);
+  if (!result.success) {
+    throw new Error(result.error);
+  }
+  currentUser = result.user!;
+  authStateCallbacks.forEach(cb => cb(currentUser));
+  return currentUser;
 };
 
 export const logoutUser = async () => {
-  await signOut(auth);
+  await electronAuth.logout();
+  currentUser = null;
+  authStateCallbacks.forEach(cb => cb(null));
 };
 
-export const sendVerificationEmail = async (user: User) => {
-  await sendEmailVerification(user);
+export const verifyEmail = async (email: string, code: string) => {
+  const result = await electronAuth.verifyEmail(email, code);
+  if (!result.success) {
+    throw new Error(result.error);
+  }
+  currentUser = result.user!;
+  authStateCallbacks.forEach(cb => cb(currentUser));
+  return currentUser;
+};
+
+export const resendVerification = async (email: string) => {
+  const result = await electronAuth.resendVerification(email);
+  if (!result.success) {
+    throw new Error(result.error);
+  }
+  return result.verificationCode;
 };
 
 export const onAuthStateChange = (callback: (user: AuthUser | null) => void) => {
-  return onAuthStateChanged(auth, (user) => {
-    callback(convertUser(user));
-  });
+  authStateCallbacks.push(callback);
+  
+  // Return unsubscribe function
+  return () => {
+    authStateCallbacks = authStateCallbacks.filter(cb => cb !== callback);
+  };
 };

@@ -5,8 +5,8 @@ import {
   loginUser, 
   logoutUser, 
   onAuthStateChange,
-  sendVerificationEmail,
-  auth
+  verifyEmail,
+  resendVerification
 } from '../config/firebase';
 import type { AuthUser } from '../config/firebase';
 
@@ -16,7 +16,8 @@ interface AuthContextType {
   register: (email: string, password: string, displayName: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  sendVerification: () => Promise<void>;
+  verify: (email: string, code: string) => Promise<void>;
+  resendCode: (email: string) => Promise<string | null>;
   isEmailVerified: boolean;
 }
 
@@ -44,6 +45,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(false);
     });
 
+    setLoading(false);
     return () => unsubscribe();
   }, []);
 
@@ -59,10 +61,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     await logoutUser();
   };
 
-  const sendVerification = async () => {
-    if (auth.currentUser) {
-      await sendVerificationEmail(auth.currentUser);
-    }
+  const verify = async (email: string, code: string) => {
+    await verifyEmail(email, code);
+  };
+
+  const resendCode = async (email: string): Promise<string | null> => {
+    return await resendVerification(email) ?? null;
   };
 
   const isEmailVerified = user?.emailVerified ?? false;
@@ -73,7 +77,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     register,
     login,
     logout,
-    sendVerification,
+    verify,
+    resendCode,
     isEmailVerified
   };
 

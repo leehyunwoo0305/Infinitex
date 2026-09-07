@@ -86,20 +86,33 @@ const WarningBox = styled.div`
   color: #fcc419;
 `;
 
+const CodeBox = styled.div`
+  padding: 12px;
+  background: var(--bg-primary);
+  border-radius: 6px;
+  margin-top: 12px;
+  font-family: monospace;
+  font-size: 14px;
+`;
+
 interface EmailVerificationProps {
   onVerified?: () => void;
 }
 
 export const EmailVerification: React.FC<EmailVerificationProps> = ({ onVerified }) => {
-  const { user, sendVerification, isEmailVerified } = useAuth();
+  const { user, isEmailVerified, resendCode } = useAuth();
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [code, setCode] = useState<string | null>(null);
 
   const handleSendVerification = async () => {
     setLoading(true);
     try {
-      await sendVerification();
-      setSent(true);
+      const newCode = await resendCode(user?.email || '');
+      if (newCode) {
+        setCode(newCode);
+        setSent(true);
+      }
     } catch (error) {
       console.error('Failed to send verification email:', error);
     } finally {
@@ -135,21 +148,27 @@ export const EmailVerification: React.FC<EmailVerificationProps> = ({ onVerified
       </Icon>
       <Title>이메일 인증이 필요합니다</Title>
       <Description>
-        <EmailHighlight>{user?.email}</EmailHighlight>로 인증 링크를 보냈습니다.
+        <EmailHighlight>{user?.email}</EmailHighlight>로 인증 코드를 발송했습니다.
         <br />
-        이메일을 확인하고 인증 링크를 클릭해주세요.
+        이메일을 확인하고 인증 코드를 입력해주세요.
       </Description>
 
       <ButtonGroup>
         <Button onClick={handleSendVerification} disabled={loading || sent}>
           <VscRefresh size={16} />
-          {sent ? '인증 메일 재발송 완료' : '인증 메일 발송'}
+          {sent ? '인증 메일 발송 완료' : '인증 메일 발송'}
         </Button>
         <SecondaryButton onClick={handleRefresh}>
           <VscRefresh size={16} />
           새로고침
         </SecondaryButton>
       </ButtonGroup>
+
+      {code && (
+        <CodeBox>
+          개발 모드 인증 코드: <strong>{code}</strong>
+        </CodeBox>
+      )}
 
       <WarningBox>
         <VscWarning size={16} />

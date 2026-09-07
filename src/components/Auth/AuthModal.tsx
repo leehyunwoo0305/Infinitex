@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { VscClose, VscMail, VscLock, VscPerson, VscEye, VscEyeClosed } from 'react-icons/vsc';
+import { VscClose, VscMail, VscLock, VscPerson, VscEye, VscEyeClosed, VscCheck } from 'react-icons/vsc';
 import { useAuth } from '../../contexts/AuthContext';
+import { sendVerificationEmail } from '../../utils/emailjs';
 
 const Overlay = styled.div`
   position: fixed;
@@ -17,7 +18,7 @@ const Overlay = styled.div`
 `;
 
 const Modal = styled.div`
-  width: 400px;
+  width: 420px;
   background: var(--bg-secondary);
   border-radius: 12px;
   border: 1px solid var(--border);
@@ -162,6 +163,55 @@ const SwitchLink = styled.button`
   &:hover { text-decoration: underline; }
 `;
 
+const VerificationSection = styled.div`
+  padding: 16px;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  margin-top: 8px;
+`;
+
+const VerificationTitle = styled.div`
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+`;
+
+const VerificationDescription = styled.div`
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  line-height: 1.5;
+`;
+
+const CodeInput = styled.input`
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 16px;
+  font-family: monospace;
+  text-align: center;
+  letter-spacing: 4px;
+  outline: none;
+
+  &:focus { border-color: #007acc; }
+`;
+
+const ResendButton = styled.button`
+  background: none;
+  border: none;
+  color: #007acc;
+  cursor: pointer;
+  font-size: 12px;
+  margin-top: 8px;
+
+  &:hover { text-decoration: underline; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+`;
+
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -169,24 +219,28 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'login' }) => {
-  const { register, login } = useAuth();
-  const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
+  const { register, login, verify, resendCode } = useAuth();
+  const [mode, setMode] = useState<'login' | 'signup' | 'verify'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [sentCode, setSentCode] = useState<string | null>(null);
 
   const resetForm = () => {
     setEmail('');
     setPassword('');
     setConfirmPassword('');
     setDisplayName('');
+    setVerificationCode('');
     setError('');
     setSuccess('');
+    setSentCode(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -208,25 +262,41 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
           return;
         }
         await register(email, password, displayName);
-        setSuccess('회원가입 성공! 이메일 인증 링크를 확인해주세요.');
+        
+        // Send verification email via EmailJS
+        const code = await sendVerificationEmail(email, displayName);
+        if (code) {
+          setSentCode(code);
+          setSuccess('회원가입 성공! 이메일로 인증 코드가 발송되었습니다.');
+          setMode('verify');
+        } else {
+          setSuccess('회원가입 성공! 이메일을 확인해주세요.');
+        }
+      } else if (mode === 'verify') {
+        await verify(email, verificationCode);
+        setSuccess('이메일 인증이 완료되었습니다!');
+        setTimeout(() => onClose(), 1500);
       } else {
-        await login(email, password);
+        const result = await login(email, password);
         onClose();
       }
     } catch (err: any) {
-      let errorMessage = '오류가 발생했습니다.';
-      if (err.code === 'auth/user-not-found') {
-        errorMessage = '등록되지 않은 이메일입니다.';
-      } else if (err.code === 'auth/wrong-password') {
-        errorMessage = '비밀번호가 틀렸습니다.';
-      } else if (err.code === 'auth/email-already-in-use') {
-        errorMessage = '이미 사용 중인 이메일입니다.';
-      } else if (err.code === 'auth/invalid-email') {
-        errorMessage = '올바른 이메일 형식이 아닙니다.';
-      } else if (err.code === 'auth/weak-password') {
-        errorMessage = '비밀번호가 너무 약합니다.';
+      setError(err.message || '오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    setLoading(true);
+    try {
+      const code = await resendCode(email);
+      if (code) {
+        setSentCode(code);
+        setSuccess('인증 코드가 재발송되었습니다.');
       }
-      setError(errorMessage);
+    } catch (err: any) {
+      setError(err.message || '재발송에 실패했습니다.');
     } finally {
       setLoading(false);
     }
@@ -238,102 +308,133 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
     <Overlay onClick={onClose}>
       <Modal onClick={e => e.stopPropagation()}>
         <Header>
-          <Title>{mode === 'login' ? '로그인' : '회원가입'}</Title>
+          <Title>
+            {mode === 'login' ? '로그인' : mode === 'signup' ? '회원가입' : '이메일 인증'}
+          </Title>
           <CloseButton onClick={onClose}>
             <VscClose size={18} />
           </CloseButton>
         </Header>
 
         <Form onSubmit={handleSubmit}>
-          {mode === 'signup' && (
-            <InputGroup>
-              <Label>이름</Label>
-              <InputWrapper>
-                <InputIcon><VscPerson size={16} /></InputIcon>
-                <Input
-                  type="text"
-                  value={displayName}
-                  onChange={e => setDisplayName(e.target.value)}
-                  placeholder="이름을 입력하세요"
-                  required
-                />
-              </InputWrapper>
-            </InputGroup>
-          )}
-
-          <InputGroup>
-            <Label>이메일</Label>
-            <InputWrapper>
-              <InputIcon><VscMail size={16} /></InputIcon>
-              <Input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="이메일을 입력하세요"
+          {mode === 'verify' ? (
+            <VerificationSection>
+              <VerificationTitle>인증 코드 입력</VerificationTitle>
+              <VerificationDescription>
+                <strong>{email}</strong>로 발송된 6자리 인증 코드를 입력해주세요.
+                {sentCode && (
+                  <div style={{ marginTop: 8, padding: 8, background: 'var(--bg-primary)', borderRadius: 4, fontFamily: 'monospace' }}>
+                    개발 모드 코드: <strong>{sentCode}</strong>
+                  </div>
+                )}
+              </VerificationDescription>
+              <CodeInput
+                type="text"
+                value={verificationCode}
+                onChange={e => setVerificationCode(e.target.value)}
+                placeholder="000000"
+                maxLength={6}
                 required
               />
-            </InputWrapper>
-          </InputGroup>
+              <ResendButton onClick={handleResendCode} disabled={loading}>
+                인증 코드 재발송
+              </ResendButton>
+            </VerificationSection>
+          ) : (
+            <>
+              {mode === 'signup' && (
+                <InputGroup>
+                  <Label>이름</Label>
+                  <InputWrapper>
+                    <InputIcon><VscPerson size={16} /></InputIcon>
+                    <Input
+                      type="text"
+                      value={displayName}
+                      onChange={e => setDisplayName(e.target.value)}
+                      placeholder="이름을 입력하세요"
+                      required
+                    />
+                  </InputWrapper>
+                </InputGroup>
+              )}
 
-          <InputGroup>
-            <Label>비밀번호</Label>
-            <InputWrapper>
-              <InputIcon><VscLock size={16} /></InputIcon>
-              <Input
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="비밀번호를 입력하세요"
-                required
-                minLength={6}
-              />
-              <TogglePassword type="button" onClick={() => setShowPassword(!showPassword)}>
-                {showPassword ? <VscEyeClosed size={16} /> : <VscEye size={16} />}
-              </TogglePassword>
-            </InputWrapper>
-          </InputGroup>
+              <InputGroup>
+                <Label>이메일</Label>
+                <InputWrapper>
+                  <InputIcon><VscMail size={16} /></InputIcon>
+                  <Input
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="이메일을 입력하세요"
+                    required
+                  />
+                </InputWrapper>
+              </InputGroup>
 
-          {mode === 'signup' && (
-            <InputGroup>
-              <Label>비밀번호 확인</Label>
-              <InputWrapper>
-                <InputIcon><VscLock size={16} /></InputIcon>
-                <Input
-                  type={showPassword ? 'text' : 'password'}
-                  value={confirmPassword}
-                  onChange={e => setConfirmPassword(e.target.value)}
-                  placeholder="비밀번호를 다시 입력하세요"
-                  required
-                  minLength={6}
-                />
-              </InputWrapper>
-            </InputGroup>
+              <InputGroup>
+                <Label>비밀번호</Label>
+                <InputWrapper>
+                  <InputIcon><VscLock size={16} /></InputIcon>
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="비밀번호를 입력하세요"
+                    required
+                    minLength={6}
+                  />
+                  <TogglePassword type="button" onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <VscEyeClosed size={16} /> : <VscEye size={16} />}
+                  </TogglePassword>
+                </InputWrapper>
+              </InputGroup>
+
+              {mode === 'signup' && (
+                <InputGroup>
+                  <Label>비밀번호 확인</Label>
+                  <InputWrapper>
+                    <InputIcon><VscLock size={16} /></InputIcon>
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      value={confirmPassword}
+                      onChange={e => setConfirmPassword(e.target.value)}
+                      placeholder="비밀번호를 다시 입력하세요"
+                      required
+                      minLength={6}
+                    />
+                  </InputWrapper>
+                </InputGroup>
+              )}
+            </>
           )}
 
           {error && <ErrorText>{error}</ErrorText>}
           {success && <SuccessText>{success}</SuccessText>}
 
           <SubmitButton type="submit" disabled={loading}>
-            {loading ? '처리 중...' : mode === 'login' ? '로그인' : '회원가입'}
+            {loading ? '처리 중...' : mode === 'login' ? '로그인' : mode === 'signup' ? '회원가입' : '인증 완료'}
           </SubmitButton>
 
-          <SwitchText>
-            {mode === 'login' ? (
-              <>
-                계정이 없으신가요?{' '}
-                <SwitchLink onClick={() => { setMode('signup'); resetForm(); }}>
-                  회원가입
-                </SwitchLink>
-              </>
-            ) : (
-              <>
-                이미 계정이 있으신가요?{' '}
-                <SwitchLink onClick={() => { setMode('login'); resetForm(); }}>
-                  로그인
-                </SwitchLink>
-              </>
-            )}
-          </SwitchText>
+          {mode !== 'verify' && (
+            <SwitchText>
+              {mode === 'login' ? (
+                <>
+                  계정이 없으신가요?{' '}
+                  <SwitchLink onClick={() => { setMode('signup'); resetForm(); }}>
+                    회원가입
+                  </SwitchLink>
+                </>
+              ) : (
+                <>
+                  이미 계정이 있으신가요?{' '}
+                  <SwitchLink onClick={() => { setMode('login'); resetForm(); }}>
+                    로그인
+                  </SwitchLink>
+                </>
+              )}
+            </SwitchText>
+          )}
         </Form>
       </Modal>
     </Overlay>

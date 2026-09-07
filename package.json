@@ -1,7 +1,7 @@
 {
   "name": "infinitex",
   "private": true,
-  "version": "1.2.0",
+  "version": "1.3.0",
   "main": "dist-electron/main.js",
   "author": "Infinitex Team",
   "description": "A modern code editor for developers",
@@ -66,12 +66,12 @@
     }
   },
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@monaco-editor/react": "^4.7.0",
     "@xterm/addon-fit": "^0.11.0",
     "@xterm/addon-web-links": "^0.12.0",
     "@xterm/xterm": "^6.0.0",
     "electron-updater": "^6.8.9",
-    "firebase": "^12.18.0",
     "isomorphic-git": "^1.30.0",
     "pdfjs-dist": "^4.10.38",
     "react": "^19.2.8",
