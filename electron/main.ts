@@ -5,6 +5,7 @@ import * as os from 'os';
 import { exec } from 'child_process';
 import { autoUpdater } from 'electron-updater';
 import { setupAuthHandlers } from './auth';
+import { setupGitHubOAuth } from './github-oauth';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -81,6 +82,7 @@ function createWindow() {
 
 app.whenReady().then(() => {
   setupAuthHandlers();
+  setupGitHubOAuth();
   createWindow();
 });
 

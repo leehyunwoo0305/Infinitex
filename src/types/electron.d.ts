@@ -145,6 +145,11 @@ interface ElectronAPI {
     error?: string;
   }>;
   authLogout: () => Promise<{ success: boolean }>;
+  authGithubLogin: () => Promise<{
+    success: boolean;
+    user?: { uid: string; email: string; displayName: string; avatar?: string; emailVerified: boolean; provider: string };
+    error?: string;
+  }>;
 }
 
 declare global {

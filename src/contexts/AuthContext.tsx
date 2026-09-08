@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { 
   registerUser, 
   loginUser, 
+  loginWithGitHub,
   logoutUser, 
   onAuthStateChange,
   verifyEmail,
@@ -15,6 +16,7 @@ interface AuthContextType {
   loading: boolean;
   register: (email: string, password: string, displayName: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
+  loginGithub: () => Promise<void>;
   logout: () => Promise<void>;
   verify: (email: string, code: string) => Promise<void>;
   resendCode: (email: string) => Promise<string | null>;
@@ -57,6 +59,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     await loginUser(email, password);
   };
 
+  const loginGithub = async () => {
+    await loginWithGitHub();
+  };
+
   const logout = async () => {
     await logoutUser();
   };
@@ -76,6 +82,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loading,
     register,
     login,
+    loginGithub,
     logout,
     verify,
     resendCode,

@@ -320,5 +320,12 @@ export const auth = {
       return await electronAPI.authLogout();
     }
     return { success: true };
+  },
+
+  async githubLogin() {
+    if (electronAPI) {
+      return await electronAPI.authGithubLogin();
+    }
+    return { success: false, error: 'Auth not available in web mode' };
   }
 };

@@ -63,6 +63,7 @@ const electronAPI = {
   authResendVerification: (email: string) => ipcRenderer.invoke('auth-resend-verification', email),
   authGetUser: (email: string) => ipcRenderer.invoke('auth-get-user', email),
   authLogout: () => ipcRenderer.invoke('auth-logout'),
+  authGithubLogin: () => ipcRenderer.invoke('auth-github-login'),
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);

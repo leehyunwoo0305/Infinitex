@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { VscClose, VscMail, VscLock, VscPerson, VscEye, VscEyeClosed, VscCheck } from 'react-icons/vsc';
+import { VscClose, VscMail, VscLock, VscPerson, VscEye, VscEyeClosed, VscCheck, VscGithubInverted } from 'react-icons/vsc';
 import { useAuth } from '../../contexts/AuthContext';
 import { sendVerificationEmail } from '../../utils/emailjs';
 
@@ -163,6 +163,51 @@ const SwitchLink = styled.button`
   &:hover { text-decoration: underline; }
 `;
 
+const Divider = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+`;
+
+const DividerLine = styled.div`
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+`;
+
+const DividerText = styled.span`
+  font-size: 12px;
+  color: var(--text-secondary);
+`;
+
+const GithubButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  margin: 0 20px;
+
+  &:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--text-secondary);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
 const VerificationSection = styled.div`
   padding: 16px;
   background: var(--bg-tertiary);
@@ -219,7 +264,7 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'login' }) => {
-  const { register, login, verify, resendCode } = useAuth();
+  const { register, login, verify, resendCode, loginGithub } = useAuth();
   const [mode, setMode] = useState<'login' | 'signup' | 'verify'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -297,6 +342,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
       }
     } catch (err: any) {
       setError(err.message || '재발송에 실패했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGithubLogin = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const user = await loginGithub();
+      onClose();
+    } catch (err: any) {
+      setError(err.message || 'GitHub 로그인에 실패했습니다.');
     } finally {
       setLoading(false);
     }
@@ -415,6 +473,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
           <SubmitButton type="submit" disabled={loading}>
             {loading ? '처리 중...' : mode === 'login' ? '로그인' : mode === 'signup' ? '회원가입' : '인증 완료'}
           </SubmitButton>
+
+          {mode !== 'verify' && (
+            <>
+              <Divider>
+                <DividerLine />
+                <DividerText>또는</DividerText>
+                <DividerLine />
+              </Divider>
+              <GithubButton type="button" onClick={handleGithubLogin} disabled={loading}>
+                <VscGithubInverted size={18} />
+                GitHub로 계속하기
+              </GithubButton>
+            </>
+          )}
 
           {mode !== 'verify' && (
             <SwitchText>
