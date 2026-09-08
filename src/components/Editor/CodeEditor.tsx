@@ -1,7 +1,56 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Editor from '@monaco-editor/react';
-import { VscClose } from 'react-icons/vsc';
+import { VscClose, VscCode, VscFileMedia, VscFilePdf, VscJson, VscMarkdown, VscTerminal, VscDatabase, VscNote, VscPaintcan, VscGlobe, VscSettingsGear, VscSymbolProperty, VscFileZip, VscFileBinary, VscTools } from 'react-icons/vsc';
 import { useStore } from '../../store/useStore';
+import { detectLanguageFromContent } from '../../utils/electron';
+
+function getTabIcon(name: string): React.ReactNode {
+  const ext = name.split('.').pop()?.toLowerCase() || '';
+  
+  const iconMap: Record<string, React.ReactNode> = {
+    ts: <VscCode size={12} color="#3178c6" />,
+    tsx: <VscCode size={12} color="#3178c6" />,
+    js: <VscCode size={12} color="#f7df1e" />,
+    jsx: <VscCode size={12} color="#f7df1e" />,
+    py: <VscCode size={12} color="#3776ab" />,
+    java: <VscCode size={12} color="#ed8b00" />,
+    c: <VscCode size={12} color="#555555" />,
+    cpp: <VscCode size={12} color="#555555" />,
+    cs: <VscCode size={12} color="#68217a" />,
+    go: <VscCode size={12} color="#00add8" />,
+    rs: <VscCode size={12} color="#dea584" />,
+    rb: <VscCode size={12} color="#cc342d" />,
+    php: <VscCode size={12} color="#777bb4" />,
+    swift: <VscCode size={12} color="#f05138" />,
+    kt: <VscCode size={12} color="#7f52ff" />,
+    dart: <VscCode size={12} color="#0175c2" />,
+    html: <VscGlobe size={12} color="#e34f26" />,
+    htm: <VscGlobe size={12} color="#e34f26" />,
+    css: <VscPaintcan size={12} color="#1572b6" />,
+    scss: <VscPaintcan size={12} color="#cc6699" />,
+    less: <VscPaintcan size={12} color="#1d365d" />,
+    vue: <VscCode size={12} color="#42b883" />,
+    svelte: <VscCode size={12} color="#ff3e00" />,
+    json: <VscJson size={12} color="#f7df1e" />,
+    xml: <VscFileMedia size={12} color="#f16529" />,
+    yaml: <VscSettingsGear size={12} color="#cb171e" />,
+    yml: <VscSettingsGear size={12} color="#cb171e" />,
+    md: <VscMarkdown size={12} color="#083fa1" />,
+    sh: <VscTerminal size={12} color="#89e051" />,
+    bash: <VscTerminal size={12} color="#89e051" />,
+    sql: <VscDatabase size={12} color="#336791" />,
+    graphql: <VscDatabase size={12} color="#e10098" />,
+    dockerfile: <VscTools size={12} color="#2496ed" />,
+    txt: <VscNote size={12} color="#898989" />,
+    pdf: <VscFilePdf size={12} color="#ff0000" />,
+    zip: <VscFileZip size={12} color="#feb900" />,
+    png: <VscFileMedia size={12} color="#a855f7" />,
+    jpg: <VscFileMedia size={12} color="#a855f7" />,
+    svg: <VscFileMedia size={12} color="#ffb13b" />,
+  };
+  
+  return iconMap[ext] || <VscCode size={12} color="#898989" />;
+}
 
 export const CodeEditor: React.FC = () => {
   const { 
@@ -12,8 +61,7 @@ export const CodeEditor: React.FC = () => {
     closeTab, 
     updateFileContent,
     readFileContent,
-    saveFile,
-    openPDF
+    saveFile
   } = useStore();
   
   const activeTab = openTabs.find(tab => tab.id === activeTabId);
@@ -23,10 +71,6 @@ export const CodeEditor: React.FC = () => {
   useEffect(() => {
     if (activeFile && activeFile.path && !activeFile.content && !activeFile.isBinary) {
       readFileContent(activeFile.id);
-    }
-    // Auto-open PDF files in PDF viewer
-    if (activeFile && activeFile.path && activeFile.name.toLowerCase().endsWith('.pdf')) {
-      openPDF(activeFile.path);
     }
   }, [activeFile?.id]);
   
@@ -48,6 +92,18 @@ export const CodeEditor: React.FC = () => {
   const handleEditorChange = (value: string | undefined) => {
     if (activeTab && value !== undefined) {
       updateFileContent(activeTab.fileId, value);
+      // Auto-detect language from content for untitled files
+      if (activeFile && activeFile.name.startsWith('untitled-')) {
+        const detectedLang = detectLanguageFromContent(value);
+        if (detectedLang !== 'plaintext' && detectedLang !== activeTab.language) {
+          // Update tab language
+          useStore.setState((state) => ({
+            openTabs: state.openTabs.map(tab =>
+              tab.id === activeTab.id ? { ...tab, language: detectedLang } : tab
+            ),
+          }));
+        }
+      }
     }
   };
   
@@ -61,14 +117,16 @@ export const CodeEditor: React.FC = () => {
   };
   
   return (
-    <div className="editor-area" style={{ flex: 1 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
       <div className="tab-bar">
         {openTabs.map(tab => (
           <div
             key={tab.id}
             className={`tab ${tab.id === activeTabId ? 'active' : ''} ${tab.isModified ? 'modified' : ''}`}
             onClick={() => handleTabClick(tab.id)}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
           >
+            {getTabIcon(tab.name)}
             <span>{tab.name}</span>
             <span 
               className="tab-close"

@@ -264,6 +264,121 @@ export function detectLanguage(filePath: string): string {
   return languageMap[ext] || 'plaintext';
 }
 
+// Detect language from file content (for untitled/new files)
+export function detectLanguageFromContent(content: string): string {
+  if (!content || content.trim().length === 0) return 'plaintext';
+  
+  const trimmed = content.trim();
+  
+  // HTML detection
+  if (trimmed.startsWith('<!DOCTYPE') || trimmed.startsWith('<html') || trimmed.startsWith('<?xml')) {
+    return 'html';
+  }
+  
+  // JSX/TSX detection
+  if (trimmed.includes('import React') || trimmed.includes('from "react"') || trimmed.includes("from 'react'")) {
+    if (trimmed.includes(': ') || trimmed.includes('interface ') || trimmed.includes('type ')) {
+      return 'typescript';
+    }
+    return 'javascript';
+  }
+  
+  // Vue detection
+  if (trimmed.includes('<template>') || trimmed.includes('<script setup>')) {
+    return 'html';
+  }
+  
+  // Python detection
+  if (trimmed.includes('def ') && trimmed.includes(':') && !trimmed.includes('{')) {
+    return 'python';
+  }
+  if (trimmed.includes('import ') && (trimmed.includes('from ') || trimmed.includes('as '))) {
+    if (trimmed.includes('print(') || trimmed.includes('def ') || trimmed.includes('class ')) {
+      return 'python';
+    }
+  }
+  
+  // Java detection
+  if (trimmed.includes('public class ') || trimmed.includes('public interface ')) {
+    return 'java';
+  }
+  
+  // C# detection
+  if (trimmed.includes('using System') || trimmed.includes('namespace ') && trimmed.includes('class ')) {
+    return 'csharp';
+  }
+  
+  // C/C++ detection
+  if (trimmed.includes('#include <') || trimmed.includes('#include "')) {
+    if (trimmed.includes('cout') || trimmed.includes('cin') || trimmed.includes('std::')) {
+      return 'cpp';
+    }
+    return 'c';
+  }
+  
+  // Go detection
+  if (trimmed.startsWith('package ') && trimmed.includes('func ')) {
+    return 'go';
+  }
+  
+  // Rust detection
+  if (trimmed.includes('fn main()') || trimmed.includes('let mut ') || trimmed.includes('impl ')) {
+    return 'rust';
+  }
+  
+  // Ruby detection
+  if (trimmed.includes('def ') && trimmed.includes('end') && !trimmed.includes('{')) {
+    return 'ruby';
+  }
+  
+  // PHP detection
+  if (trimmed.startsWith('<?php')) {
+    return 'php';
+  }
+  
+  // Shell detection
+  if (trimmed.startsWith('#!/bin/bash') || trimmed.startsWith('#!/bin/sh') || trimmed.startsWith('#!/usr/bin/env bash')) {
+    return 'shell';
+  }
+  
+  // SQL detection
+  if (trimmed.match(/\b(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)\b/i)) {
+    return 'sql';
+  }
+  
+  // JSON detection
+  if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+    try {
+      JSON.parse(trimmed);
+      return 'json';
+    } catch {}
+  }
+  
+  // YAML detection
+  if (trimmed.split('\n').some(line => line.match(/^[a-zA-Z_]+:\s/))) {
+    return 'yaml';
+  }
+  
+  // Markdown detection
+  if (trimmed.startsWith('#') || trimmed.includes('**') || trimmed.includes('```')) {
+    return 'markdown';
+  }
+  
+  // CSS detection
+  if (trimmed.includes('{') && trimmed.includes('}') && trimmed.includes(':') && !trimmed.includes('function')) {
+    if (trimmed.match(/[.#][a-zA-Z]+\s*\{/)) {
+      return 'css';
+    }
+  }
+  
+  // Dockerfile detection
+  if (trimmed.startsWith('FROM ') || trimmed.includes('RUN ') || trimmed.includes('COPY ')) {
+    return 'dockerfile';
+  }
+  
+  return 'plaintext';
+}
+
 // Check if file is binary
 export function isBinaryFile(filePath: string): boolean {
   const ext = filePath.split('.').pop()?.toLowerCase() || '';

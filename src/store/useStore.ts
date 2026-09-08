@@ -91,6 +91,14 @@ export const useStore = create<AppState>()(
   setFiles: (files) => set({ files }),
   
   openFile: (file) => set((state) => {
+    // Auto-open PDF files in PDF viewer
+    if (file.path && file.name.toLowerCase().endsWith('.pdf')) {
+      return {
+        showPDF: true,
+        pdfFile: file.path,
+      };
+    }
+    
     const existingTab = state.openTabs.find(tab => tab.fileId === file.id);
     if (existingTab) {
       return { activeTabId: existingTab.id, activeFile: file.path || null };

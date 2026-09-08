@@ -11,6 +11,21 @@ import {
   VscSignIn,
   VscSignOut,
   VscPerson,
+  VscCode,
+  VscFileMedia,
+  VscFilePdf,
+  VscFileZip,
+  VscFileBinary,
+  VscSymbolProperty,
+  VscNote,
+  VscTerminal,
+  VscTools,
+  VscDatabase,
+  VscGlobe,
+  VscJson,
+  VscMarkdown,
+  VscSettingsGear,
+  VscPaintcan,
 } from 'react-icons/vsc';
 import type { FileNode } from '../../types';
 import { useStore } from '../../store/useStore';
@@ -32,6 +47,104 @@ function filterTree(nodes: FileNode[], query: string): FileNode[] {
     }
     return acc;
   }, []);
+}
+
+function getFileIcon(name: string): React.ReactNode {
+  const ext = name.split('.').pop()?.toLowerCase() || '';
+  
+  const iconMap: Record<string, React.ReactNode> = {
+    // Code files
+    ts: <VscCode size={14} color="#3178c6" />,
+    tsx: <VscCode size={14} color="#3178c6" />,
+    js: <VscCode size={14} color="#f7df1e" />,
+    jsx: <VscCode size={14} color="#f7df1e" />,
+    py: <VscCode size={14} color="#3776ab" />,
+    java: <VscCode size={14} color="#ed8b00" />,
+    c: <VscCode size={14} color="#555555" />,
+    cpp: <VscCode size={14} color="#555555" />,
+    h: <VscCode size={14} color="#555555" />,
+    hpp: <VscCode size={14} color="#555555" />,
+    cs: <VscCode size={14} color="#68217a" />,
+    go: <VscCode size={14} color="#00add8" />,
+    rs: <VscCode size={14} color="#dea584" />,
+    rb: <VscCode size={14} color="#cc342d" />,
+    php: <VscCode size={14} color="#777bb4" />,
+    swift: <VscCode size={14} color="#f05138" />,
+    kt: <VscCode size={14} color="#7f52ff" />,
+    scala: <VscCode size={14} color="#dc322f" />,
+    dart: <VscCode size={14} color="#0175c2" />,
+    lua: <VscCode size={14} color="#000080" />,
+    r: <VscCode size={14} color="#276dc3" />,
+    
+    // Web files
+    html: <VscGlobe size={14} color="#e34f26" />,
+    htm: <VscGlobe size={14} color="#e34f26" />,
+    css: <VscPaintcan size={14} color="#1572b6" />,
+    scss: <VscPaintcan size={14} color="#cc6699" />,
+    less: <VscPaintcan size={14} color="#1d365d" />,
+    vue: <VscCode size={14} color="#42b883" />,
+    svelte: <VscCode size={14} color="#ff3e00" />,
+    
+    // Config/Data files
+    json: <VscJson size={14} color="#f7df1e" />,
+    xml: <VscFileMedia size={14} color="#f16529" />,
+    yaml: <VscSettingsGear size={14} color="#cb171e" />,
+    yml: <VscSettingsGear size={14} color="#cb171e" />,
+    toml: <VscSettingsGear size={14} color="#9c4221" />,
+    ini: <VscSettingsGear size={14} color="#9c4221" />,
+    cfg: <VscSettingsGear size={14} color="#9c4221" />,
+    conf: <VscSettingsGear size={14} color="#9c4221" />,
+    
+    // Documentation
+    md: <VscMarkdown size={14} color="#083fa1" />,
+    
+    // Shell/Terminal
+    sh: <VscTerminal size={14} color="#89e051" />,
+    bash: <VscTerminal size={14} color="#89e051" />,
+    zsh: <VscTerminal size={14} color="#89e051" />,
+    ps1: <VscTerminal size={14} color="#012456" />,
+    bat: <VscTerminal size={14} color="#c1f12e" />,
+    cmd: <VscTerminal size={14} color="#c1f12e" />,
+    
+    // Database
+    sql: <VscDatabase size={14} color="#336791" />,
+    graphql: <VscDatabase size={14} color="#e10098" />,
+    gql: <VscDatabase size={14} color="#e10098" />,
+    
+    // Docker
+    dockerfile: <VscTools size={14} color="#2496ed" />,
+    dockerignore: <VscTools size={14} color="#2496ed" />,
+    makefile: <VscTools size={14} color="#427819" />,
+    
+    // Build/Package
+    txt: <VscNote size={14} color="#898989" />,
+    log: <VscNote size={14} color="#898989" />,
+    env: <VscSymbolProperty size={14} color="#ecd53f" />,
+    gitignore: <VscSymbolProperty size={14} color="#f05032" />,
+    
+    // Binary/Archive
+    pdf: <VscFilePdf size={14} color="#ff0000" />,
+    zip: <VscFileZip size={14} color="#feb900" />,
+    rar: <VscFileZip size={14} color="#feb900" />,
+    '7z': <VscFileZip size={14} color="#feb900" />,
+    tar: <VscFileZip size={14} color="#feb900" />,
+    gz: <VscFileZip size={14} color="#feb900" />,
+    
+    // Images
+    png: <VscFileMedia size={14} color="#a855f7" />,
+    jpg: <VscFileMedia size={14} color="#a855f7" />,
+    jpeg: <VscFileMedia size={14} color="#a855f7" />,
+    gif: <VscFileMedia size={14} color="#a855f7" />,
+    svg: <VscFileMedia size={14} color="#ffb13b" />,
+    webp: <VscFileMedia size={14} color="#a855f7" />,
+    
+    // Binary
+    exe: <VscFileBinary size={14} color="#6b7280" />,
+    dll: <VscFileBinary size={14} color="#6b7280" />,
+    so: <VscFileBinary size={14} color="#6b7280" />,
+  };
+  
+  return iconMap[ext] || <VscFile size={14} color="#898989" />;
 }
 
 export const FileExplorer: React.FC = () => {
@@ -268,7 +381,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ file, onFileOpen }) => {
     if (file.type === 'folder') {
       return isOpen ? <VscFolderOpened /> : <VscFolder />;
     }
-    return <VscFile />;
+    return getFileIcon(file.name);
   };
   
   return (
