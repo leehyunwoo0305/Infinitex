@@ -47,7 +47,7 @@ export const MenuBar: React.FC = () => {
     authMode
   } = useStore();
   
-  const { user, isEmailVerified } = useAuth();
+  const { user } = useAuth();
   const [themeSettingsOpen, setThemeSettingsOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
@@ -283,7 +283,6 @@ export const MenuBar: React.FC = () => {
               <span style={{ fontSize: '12px', maxWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {user.displayName || user.email?.split('@')[0]}
               </span>
-              {!isEmailVerified && <span style={{ color: '#fcc419', fontSize: '8px' }}>●</span>}
             </button>
           ) : (
             <button 
@@ -334,7 +333,6 @@ export const MenuBar: React.FC = () => {
       <AuthModal 
         isOpen={authOpen} 
         onClose={() => setAuthOpen(false)}
-        initialMode={authMode}
       />
     </>
   );

@@ -57,13 +57,8 @@ const electronAPI = {
   onUpdateError: (callback: (error: string) => void) => ipcRenderer.on('update-error', (_event, error) => callback(error)),
 
   // Auth
-  authRegister: (email: string, password: string, displayName: string) => ipcRenderer.invoke('auth-register', email, password, displayName),
-  authLogin: (email: string, password: string) => ipcRenderer.invoke('auth-login', email, password),
-  authVerifyEmail: (email: string, code: string) => ipcRenderer.invoke('auth-verify-email', email, code),
-  authResendVerification: (email: string) => ipcRenderer.invoke('auth-resend-verification', email),
-  authGetUser: (email: string) => ipcRenderer.invoke('auth-get-user', email),
-  authLogout: () => ipcRenderer.invoke('auth-logout'),
   authGithubLogin: () => ipcRenderer.invoke('auth-github-login'),
+  authLogout: () => ipcRenderer.invoke('auth-logout'),
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);

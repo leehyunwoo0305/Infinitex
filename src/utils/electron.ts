@@ -280,37 +280,9 @@ export function isBinaryFile(filePath: string): boolean {
 
 // Auth
 export const auth = {
-  async register(email: string, password: string, displayName: string) {
+  async githubLogin() {
     if (electronAPI) {
-      return await electronAPI.authRegister(email, password, displayName);
-    }
-    return { success: false, error: 'Auth not available in web mode' };
-  },
-
-  async login(email: string, password: string) {
-    if (electronAPI) {
-      return await electronAPI.authLogin(email, password);
-    }
-    return { success: false, error: 'Auth not available in web mode' };
-  },
-
-  async verifyEmail(email: string, code: string) {
-    if (electronAPI) {
-      return await electronAPI.authVerifyEmail(email, code);
-    }
-    return { success: false, error: 'Auth not available in web mode' };
-  },
-
-  async resendVerification(email: string) {
-    if (electronAPI) {
-      return await electronAPI.authResendVerification(email);
-    }
-    return { success: false, error: 'Auth not available in web mode' };
-  },
-
-  async getUser(email: string) {
-    if (electronAPI) {
-      return await electronAPI.authGetUser(email);
+      return await electronAPI.authGithubLogin();
     }
     return { success: false, error: 'Auth not available in web mode' };
   },
@@ -320,12 +292,5 @@ export const auth = {
       return await electronAPI.authLogout();
     }
     return { success: true };
-  },
-
-  async githubLogin() {
-    if (electronAPI) {
-      return await electronAPI.authGithubLogin();
-    }
-    return { success: false, error: 'Auth not available in web mode' };
   }
 };

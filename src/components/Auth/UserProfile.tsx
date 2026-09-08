@@ -143,7 +143,7 @@ interface UserProfileProps {
 }
 
 export const UserProfile: React.FC<UserProfileProps> = ({ onLogout }) => {
-  const { user, logout, isEmailVerified } = useAuth();
+  const { user, logout } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const handleLogout = async () => {
@@ -173,15 +173,9 @@ export const UserProfile: React.FC<UserProfileProps> = ({ onLogout }) => {
           <UserEmail>
             <VscMail size={12} />
             {user.email}
-            {isEmailVerified ? (
               <VerifiedBadge>
                 <VscCheck size={10} /> 인증됨
               </VerifiedBadge>
-            ) : (
-              <UnverifiedBadge>
-                <VscWarning size={10} /> 미인증
-              </UnverifiedBadge>
-            )}
           </UserEmail>
         </UserInfo>
       </Header>
