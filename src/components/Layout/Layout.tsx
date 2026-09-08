@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { MenuBar } from '../Header/MenuBar';
 import { StatusBar } from '../Header/StatusBar';
 import { FileExplorer } from '../Sidebar/FileExplorer';
@@ -13,9 +13,7 @@ import { useStore } from '../../store/useStore';
 import '../../styles/global.scss';
 
 export const Layout: React.FC = () => {
-  const { sidebarOpen, terminalOpen, viewMode, gitPanelOpen, activeTheme } = useStore();
-  const [showPDF, setShowPDF] = useState(false);
-  const [pdfFile, setPdfFile] = useState<string | null>(null);
+  const { sidebarOpen, terminalOpen, viewMode, gitPanelOpen, activeTheme, showPDF, pdfFile, closePDF } = useStore();
   
   const themeStyle = {
     '--bg-primary': activeTheme.colors.background,
@@ -37,7 +35,7 @@ export const Layout: React.FC = () => {
         <div className="editor-area">
           <div className="split-view">
             {showPDF ? (
-              <PDFViewer file={pdfFile} onClose={() => setShowPDF(false)} />
+              <PDFViewer file={pdfFile} onClose={closePDF} />
             ) : (
               <CodeEditor />
             )}

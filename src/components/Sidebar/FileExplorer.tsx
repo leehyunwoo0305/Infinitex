@@ -7,11 +7,15 @@ import {
   VscFolderOpened,
   VscRefresh,
   VscClose,
-  VscSearch
+  VscSearch,
+  VscSignIn,
+  VscSignOut,
+  VscPerson,
 } from 'react-icons/vsc';
 import type { FileNode } from '../../types';
 import { useStore } from '../../store/useStore';
 import { fileSystem, dialog, isElectronApp } from '../../utils/electron';
+import { useAuth } from '../../contexts/AuthContext';
 
 function filterTree(nodes: FileNode[], query: string): FileNode[] {
   if (!query) return nodes;
@@ -31,7 +35,8 @@ function filterTree(nodes: FileNode[], query: string): FileNode[] {
 }
 
 export const FileExplorer: React.FC = () => {
-  const { files, openFile, sidebarOpen, loadWorkspace, workspacePath } = useStore();
+  const { files, openFile, sidebarOpen, loadWorkspace, workspacePath, setAuthOpen } = useStore();
+  const { user, logout, loginGithub } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   
   const filteredFiles = useMemo(() => filterTree(files, searchQuery), [files, searchQuery]);
@@ -151,6 +156,86 @@ export const FileExplorer: React.FC = () => {
           filteredFiles.map(file => (
             <TreeNode key={file.id} file={file} onFileOpen={openFile} />
           ))
+        )}
+      </div>
+      
+      <div style={{ 
+        marginTop: 'auto',
+        borderTop: '1px solid var(--border-color)',
+        padding: '8px 12px',
+      }}>
+        {user ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{
+              width: '28px',
+              height: '28px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #007acc 0%, #005fa3 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              flexShrink: 0,
+            }}>
+              {user.avatar ? (
+                <img src={user.avatar} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+              ) : (
+                (user.displayName || user.email || '?')[0].toUpperCase()
+              )}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ 
+                fontSize: '12px', 
+                color: 'var(--text-primary)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}>
+                {user.displayName || user.email?.split('@')[0]}
+              </div>
+              <div style={{ 
+                fontSize: '10px', 
+                color: 'var(--text-secondary)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}>
+                {user.email}
+              </div>
+            </div>
+            <button 
+              className="toolbar-button"
+              onClick={logout}
+              title="Logout"
+              style={{ width: '24px', height: '24px', flexShrink: 0 }}
+            >
+              <VscSignOut size={14} />
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setAuthOpen(true)}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              padding: '8px',
+              backgroundColor: 'var(--accent-color)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '12px',
+              fontWeight: '500',
+            }}
+          >
+            <VscSignIn size={14} />
+            GitHub로 로그인
+          </button>
         )}
       </div>
     </div>

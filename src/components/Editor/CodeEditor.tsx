@@ -12,7 +12,8 @@ export const CodeEditor: React.FC = () => {
     closeTab, 
     updateFileContent,
     readFileContent,
-    saveFile
+    saveFile,
+    openPDF
   } = useStore();
   
   const activeTab = openTabs.find(tab => tab.id === activeTabId);
@@ -22,6 +23,10 @@ export const CodeEditor: React.FC = () => {
   useEffect(() => {
     if (activeFile && activeFile.path && !activeFile.content && !activeFile.isBinary) {
       readFileContent(activeFile.id);
+    }
+    // Auto-open PDF files in PDF viewer
+    if (activeFile && activeFile.path && activeFile.name.toLowerCase().endsWith('.pdf')) {
+      openPDF(activeFile.path);
     }
   }, [activeFile?.id]);
   

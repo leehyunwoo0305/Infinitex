@@ -19,8 +19,6 @@ import {
   VscSettings,
   VscFilePdf,
   VscTools,
-  VscPerson,
-  VscSignIn
 } from 'react-icons/vsc';
 import { useStore } from '../../store/useStore';
 import { ThemeSettings } from '../Settings/ThemeSettings';
@@ -44,7 +42,8 @@ export const MenuBar: React.FC = () => {
     workspacePath,
     authOpen,
     setAuthOpen,
-    authMode
+    authMode,
+    createNewFile
   } = useStore();
   
   const { user } = useAuth();
@@ -65,13 +64,27 @@ export const MenuBar: React.FC = () => {
   
   const handleNewFile = async () => {
     if (!isElectronApp || !workspacePath) return;
-    // Simple new file creation
     const fileName = prompt('Enter file name:');
     if (fileName) {
       const filePath = `${workspacePath}/${fileName}`;
       await fileSystem.writeFile(filePath, '');
       await useStore.getState().loadWorkspace(workspacePath);
+      const language = detectLanguage(fileName);
+      const newFile = {
+        id: `file-${Date.now()}-${Math.random()}`,
+        name: fileName,
+        type: 'file' as const,
+        path: filePath,
+        language,
+        content: '',
+      };
+      useStore.getState().openFile(newFile);
     }
+  };
+  
+  const handleNewTextFile = () => {
+    const name = `untitled-${Date.now()}.txt`;
+    createNewFile(name, '');
   };
   
   const handleOpenFile = async () => {
@@ -116,6 +129,7 @@ export const MenuBar: React.FC = () => {
           {activeMenu === 'file' && (
             <div className="menu-dropdown">
               <div onClick={handleNewFile}>New File</div>
+              <div onClick={handleNewTextFile}>New Text File</div>
               <div onClick={handleOpenFile}>Open File</div>
               <div onClick={() => {
                 dialog.openFolder().then(p => {
@@ -271,28 +285,6 @@ export const MenuBar: React.FC = () => {
           >
             <VscSettingsGear />
           </button>
-
-          {user ? (
-            <button 
-              className="toolbar-button"
-              onClick={() => setAuthOpen(true, 'login')}
-              title={user.displayName || user.email || "Account"}
-              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-            >
-              <VscPerson size={14} />
-              <span style={{ fontSize: '12px', maxWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {user.displayName || user.email?.split('@')[0]}
-              </span>
-            </button>
-          ) : (
-            <button 
-              className="toolbar-button"
-              onClick={() => setAuthOpen(true, 'login')}
-              title="Login / Sign Up"
-            >
-              <VscSignIn />
-            </button>
-          )}
         </div>
 
         {isElectronApp && (

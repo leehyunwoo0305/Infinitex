@@ -1,7 +1,7 @@
 {
   "name": "infinitex",
   "private": true,
-  "version": "1.4.2",
+  "version": "1.5.0",
   "main": "dist-electron/main.js",
   "author": "Infinitex Team",
   "description": "A modern code editor for developers",

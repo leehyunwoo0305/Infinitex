@@ -17,6 +17,8 @@ interface AppState {
   workspacePath: string | null;
   authOpen: boolean;
   authMode: 'login' | 'signup';
+  showPDF: boolean;
+  pdfFile: string | null;
   
   setFiles: (files: FileNode[]) => void;
   openFile: (file: FileNode) => void;
@@ -31,6 +33,9 @@ interface AppState {
   toggleTools: () => void;
   setWorkspacePath: (path: string) => void;
   setAuthOpen: (open: boolean, mode?: 'login' | 'signup') => void;
+  openPDF: (filePath: string) => void;
+  closePDF: () => void;
+  createNewFile: (name: string, content?: string) => void;
   loadWorkspace: (dirPath: string) => Promise<void>;
   loadChildren: (nodeId: string, dirPath: string) => Promise<void>;
   saveFile: (fileId: string) => Promise<void>;
@@ -80,6 +85,8 @@ export const useStore = create<AppState>()(
       workspacePath: null,
       authOpen: false,
       authMode: 'login',
+      showPDF: false,
+      pdfFile: null,
   
   setFiles: (files) => set({ files }),
   
@@ -132,6 +139,37 @@ export const useStore = create<AppState>()(
   toggleGitPanel: () => set((state) => ({ gitPanelOpen: !state.gitPanelOpen })),
   toggleTools: () => set((state) => ({ toolsOpen: !state.toolsOpen })),
   setAuthOpen: (open, mode = 'login') => set({ authOpen: open, authMode: mode }),
+  
+  openPDF: (filePath) => set({ showPDF: true, pdfFile: filePath }),
+  closePDF: () => set({ showPDF: false, pdfFile: null }),
+  
+  createNewFile: (name, content = '') => set((state) => {
+    const id = generateId();
+    const language = detectLanguage(name);
+    const newFile: FileNode = {
+      id,
+      name,
+      type: 'file',
+      path: state.workspacePath ? `${state.workspacePath}/${name}` : undefined,
+      language,
+      content,
+    };
+    
+    const newTab: Tab = {
+      id: `tab-${id}`,
+      fileId: id,
+      name,
+      language,
+      isModified: false,
+    };
+    
+    return {
+      files: [...state.files, newFile],
+      openTabs: [...state.openTabs, newTab],
+      activeTabId: newTab.id,
+      activeFile: newFile.path || null,
+    };
+  }),
   
   setWorkspacePath: (path) => set({ workspacePath: path }),
   

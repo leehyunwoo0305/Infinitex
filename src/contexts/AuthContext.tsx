@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { loginWithGitHub, logoutUser, onAuthStateChange } from '../config/firebase';
+import { loginWithGitHub, logoutUser, onAuthStateChange, getCurrentUser } from '../config/firebase';
 import type { AuthUser } from '../config/firebase';
 
 interface AuthContextType {
@@ -25,15 +25,14 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<AuthUser | null>(() => getCurrentUser());
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChange((user) => {
       setUser(user);
       setLoading(false);
     });
-    setLoading(false);
     return () => unsubscribe();
   }, []);
 
