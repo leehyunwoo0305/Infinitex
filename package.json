@@ -8,14 +8,15 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:electron": "tsc -p tsconfig.electron.json",
     "lint": "oxlint",
     "preview": "vite preview",
-    "electron:dev": "concurrently \"vite\" \"tsc -b && wait-on http://localhost:5173 && electron .\"",
-    "electron:build": "vite build && tsc -b && electron-builder",
-    "electron:build:win": "vite build && tsc -b && electron-builder --win",
-    "electron:build:mac": "vite build && tsc -b && electron-builder --mac",
-    "electron:build:linux": "vite build && tsc -b && electron-builder --linux",
-    "electron:build:publish": "vite build && tsc -b && electron-builder --win --publish always"
+    "electron:dev": "concurrently \"vite\" \"tsc -p tsconfig.electron.json && wait-on http://localhost:5173 && electron .\"",
+    "electron:build": "vite build && tsc -b && tsc -p tsconfig.electron.json && electron-builder",
+    "electron:build:win": "vite build && tsc -b && tsc -p tsconfig.electron.json && electron-builder --win",
+    "electron:build:mac": "vite build && tsc -b && tsc -p tsconfig.electron.json && electron-builder --mac",
+    "electron:build:linux": "vite build && tsc -b && tsc -p tsconfig.electron.json && electron-builder --linux",
+    "electron:build:publish": "vite build && tsc -b && tsc -p tsconfig.electron.json && electron-builder --win --publish always"
   },
   "build": {
     "appId": "com.infinitex.app",
