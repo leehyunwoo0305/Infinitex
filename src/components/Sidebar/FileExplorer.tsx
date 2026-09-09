@@ -52,41 +52,99 @@ function filterTree(nodes: FileNode[], query: string): FileNode[] {
 function getFileIcon(name: string): React.ReactNode {
   const ext = name.split('.').pop()?.toLowerCase() || '';
   
+  // Language-specific icons with brand colors
   const iconMap: Record<string, React.ReactNode> = {
-    // Code files
+    // TypeScript/JavaScript
     ts: <VscCode size={14} color="#3178c6" />,
     tsx: <VscCode size={14} color="#3178c6" />,
     js: <VscCode size={14} color="#f7df1e" />,
     jsx: <VscCode size={14} color="#f7df1e" />,
+    mjs: <VscCode size={14} color="#f7df1e" />,
+    cjs: <VscCode size={14} color="#f7df1e" />,
+    
+    // Python
     py: <VscCode size={14} color="#3776ab" />,
+    pyw: <VscCode size={14} color="#3776ab" />,
+    
+    // Java
     java: <VscCode size={14} color="#ed8b00" />,
+    
+    // C/C++
     c: <VscCode size={14} color="#555555" />,
     cpp: <VscCode size={14} color="#555555" />,
     h: <VscCode size={14} color="#555555" />,
     hpp: <VscCode size={14} color="#555555" />,
-    cs: <VscCode size={14} color="#68217a" />,
-    go: <VscCode size={14} color="#00add8" />,
-    rs: <VscCode size={14} color="#dea584" />,
-    rb: <VscCode size={14} color="#cc342d" />,
-    php: <VscCode size={14} color="#777bb4" />,
-    swift: <VscCode size={14} color="#f05138" />,
-    kt: <VscCode size={14} color="#7f52ff" />,
-    scala: <VscCode size={14} color="#dc322f" />,
-    dart: <VscCode size={14} color="#0175c2" />,
-    lua: <VscCode size={14} color="#000080" />,
-    r: <VscCode size={14} color="#276dc3" />,
+    cc: <VscCode size={14} color="#555555" />,
+    cxx: <VscCode size={14} color="#555555" />,
     
-    // Web files
+    // C#
+    cs: <VscCode size={14} color="#68217a" />,
+    
+    // Go
+    go: <VscCode size={14} color="#00add8" />,
+    
+    // Rust
+    rs: <VscCode size={14} color="#dea584" />,
+    
+    // Ruby
+    rb: <VscCode size={14} color="#cc342d" />,
+    erb: <VscCode size={14} color="#cc342d" />,
+    
+    // PHP
+    php: <VscCode size={14} color="#777bb4" />,
+    
+    // Swift
+    swift: <VscCode size={14} color="#f05138" />,
+    
+    // Kotlin
+    kt: <VscCode size={14} color="#7f52ff" />,
+    kts: <VscCode size={14} color="#7f52ff" />,
+    
+    // Scala
+    scala: <VscCode size={14} color="#dc322f" />,
+    sc: <VscCode size={14} color="#dc322f" />,
+    
+    // Dart
+    dart: <VscCode size={14} color="#0175c2" />,
+    
+    // Lua
+    lua: <VscCode size={14} color="#000080" />,
+    
+    // R
+    r: <VscCode size={14} color="#276dc3" />,
+    rmd: <VscCode size={14} color="#276dc3" />,
+    
+    // Perl
+    pl: <VscCode size={14} color="#39457e" />,
+    pm: <VscCode size={14} color="#39457e" />,
+    
+    // Elixir
+    ex: <VscCode size={14} color="#6e4a7e" />,
+    exs: <VscCode size={14} color="#6e4a7e" />,
+    
+    // Haskell
+    hs: <VscCode size={14} color="#5e5086" />,
+    
+    // Clojure
+    clj: <VscCode size={14} color="#5881d8" />,
+    cljs: <VscCode size={14} color="#5881d8" />,
+    
+    // Erlang
+    erl: <VscCode size={14} color="#a90533" />,
+    
+    // Web
     html: <VscGlobe size={14} color="#e34f26" />,
     htm: <VscGlobe size={14} color="#e34f26" />,
     css: <VscPaintcan size={14} color="#1572b6" />,
     scss: <VscPaintcan size={14} color="#cc6699" />,
+    sass: <VscPaintcan size={14} color="#cc6699" />,
     less: <VscPaintcan size={14} color="#1d365d" />,
     vue: <VscCode size={14} color="#42b883" />,
     svelte: <VscCode size={14} color="#ff3e00" />,
     
-    // Config/Data files
+    // Config/Data
     json: <VscJson size={14} color="#f7df1e" />,
+    jsonc: <VscJson size={14} color="#f7df1e" />,
     xml: <VscFileMedia size={14} color="#f16529" />,
     yaml: <VscSettingsGear size={14} color="#cb171e" />,
     yml: <VscSettingsGear size={14} color="#cb171e" />,
@@ -97,11 +155,14 @@ function getFileIcon(name: string): React.ReactNode {
     
     // Documentation
     md: <VscMarkdown size={14} color="#083fa1" />,
+    mdx: <VscMarkdown size={14} color="#083fa1" />,
+    rst: <VscMarkdown size={14} color="#083fa1" />,
     
     // Shell/Terminal
     sh: <VscTerminal size={14} color="#89e051" />,
     bash: <VscTerminal size={14} color="#89e051" />,
     zsh: <VscTerminal size={14} color="#89e051" />,
+    fish: <VscTerminal size={14} color="#89e051" />,
     ps1: <VscTerminal size={14} color="#012456" />,
     bat: <VscTerminal size={14} color="#c1f12e" />,
     cmd: <VscTerminal size={14} color="#c1f12e" />,
@@ -111,16 +172,18 @@ function getFileIcon(name: string): React.ReactNode {
     graphql: <VscDatabase size={14} color="#e10098" />,
     gql: <VscDatabase size={14} color="#e10098" />,
     
-    // Docker
+    // Docker/DevOps
     dockerfile: <VscTools size={14} color="#2496ed" />,
     dockerignore: <VscTools size={14} color="#2496ed" />,
     makefile: <VscTools size={14} color="#427819" />,
+    cmake: <VscTools size={14} color="#427819" />,
     
     // Build/Package
     txt: <VscNote size={14} color="#898989" />,
     log: <VscNote size={14} color="#898989" />,
     env: <VscSymbolProperty size={14} color="#ecd53f" />,
     gitignore: <VscSymbolProperty size={14} color="#f05032" />,
+    editorconfig: <VscSymbolProperty size={14} color="#f05032" />,
     
     // Binary/Archive
     pdf: <VscFilePdf size={14} color="#ff0000" />,
@@ -137,11 +200,14 @@ function getFileIcon(name: string): React.ReactNode {
     gif: <VscFileMedia size={14} color="#a855f7" />,
     svg: <VscFileMedia size={14} color="#ffb13b" />,
     webp: <VscFileMedia size={14} color="#a855f7" />,
+    ico: <VscFileMedia size={14} color="#a855f7" />,
+    bmp: <VscFileMedia size={14} color="#a855f7" />,
     
     // Binary
     exe: <VscFileBinary size={14} color="#6b7280" />,
     dll: <VscFileBinary size={14} color="#6b7280" />,
     so: <VscFileBinary size={14} color="#6b7280" />,
+    dylib: <VscFileBinary size={14} color="#6b7280" />,
   };
   
   return iconMap[ext] || <VscFile size={14} color="#898989" />;
@@ -372,7 +438,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ file, onFileOpen }) => {
         await loadChildren(file.id, file.path);
       }
       setIsOpen(!isOpen);
-    } else if (!file.isBinary) {
+    } else {
       onFileOpen(file);
     }
   };

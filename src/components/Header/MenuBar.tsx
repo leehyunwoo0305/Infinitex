@@ -69,16 +69,22 @@ export const MenuBar: React.FC = () => {
       const filePath = `${workspacePath}/${fileName}`;
       await fileSystem.writeFile(filePath, '');
       await useStore.getState().loadWorkspace(workspacePath);
-      const language = detectLanguage(fileName);
-      const newFile = {
-        id: `file-${Date.now()}-${Math.random()}`,
-        name: fileName,
-        type: 'file' as const,
-        path: filePath,
-        language,
-        content: '',
+      // Find the file in the reloaded tree by path
+      const state = useStore.getState();
+      const findFileByPath = (files: any[], path: string): any => {
+        for (const file of files) {
+          if (file.path === path) return file;
+          if (file.children) {
+            const found = findFileByPath(file.children, path);
+            if (found) return found;
+          }
+        }
+        return null;
       };
-      useStore.getState().openFile(newFile);
+      const newFile = findFileByPath(state.files, filePath);
+      if (newFile) {
+        useStore.getState().openFile(newFile);
+      }
     }
   };
   

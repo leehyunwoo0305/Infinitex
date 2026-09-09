@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import { VscCopy, VscCheck, VscTools, VscDownload, VscLink } from 'react-icons/vsc';
+import { VscCopy, VscDownload, VscLink } from 'react-icons/vsc';
+import QRCode from 'qrcode';
 
 const Container = styled.div`
   display: flex;
@@ -27,16 +28,6 @@ const Input = styled.input`
   background: var(--bg-primary);
   color: var(--text-primary);
   font-size: 13px;
-`;
-
-const Select = styled.select`
-  padding: 6px 12px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-size: 13px;
-  cursor: pointer;
 `;
 
 const Button = styled.button`
@@ -115,99 +106,6 @@ const Footer = styled.div`
   background: var(--bg-secondary);
 `;
 
-function drawQR(canvas: HTMLCanvasElement, data: string, size: number) {
-  const ctx = canvas.getContext('2d')!;
-  const modules = generateQRMatrix(data);
-  const moduleCount = modules.length;
-  const cellSize = size / (moduleCount + 8);
-  const offset = cellSize * 4;
-
-  canvas.width = size;
-  canvas.height = size;
-
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, size, size);
-
-  ctx.fillStyle = '#000000';
-  for (let row = 0; row < moduleCount; row++) {
-    for (let col = 0; col < moduleCount; col++) {
-      if (modules[row][col]) {
-        ctx.fillRect(offset + col * cellSize, offset + row * cellSize, cellSize, cellSize);
-      }
-    }
-  }
-}
-
-function generateQRMatrix(text: string): boolean[][] {
-  const len = text.length;
-  const size = Math.max(21, Math.ceil(Math.sqrt(len * 4)) + 21);
-  const matrix: boolean[][] = Array.from({ length: size }, () => Array(size).fill(false));
-
-  // Finder patterns
-  const drawFinder = (row: number, col: number) => {
-    for (let r = 0; r < 7; r++) {
-      for (let c = 0; c < 7; c++) {
-        if (r === 0 || r === 6 || c === 0 || c === 6 || (r >= 2 && r <= 4 && c >= 2 && c <= 4)) {
-          if (row + r < size && col + c < size) matrix[row + r][col + c] = true;
-        }
-      }
-    }
-  };
-
-  drawFinder(0, 0);
-  drawFinder(0, size - 7);
-  drawFinder(size - 7, 0);
-
-  // Timing patterns
-  for (let i = 8; i < size - 8; i++) {
-    matrix[6][i] = i % 2 === 0;
-    matrix[i][6] = i % 2 === 0;
-  }
-
-  // Data encoding
-  const bits: boolean[] = [];
-  for (let i = 0; i < text.length; i++) {
-    const charCode = text.charCodeAt(i);
-    for (let b = 7; b >= 0; b--) {
-      bits.push((charCode >> b) & 1 ? true : false);
-    }
-  }
-
-  // Fill data into matrix
-  let bitIndex = 0;
-  let col = size - 1;
-  let direction = -1;
-
-  while (col >= 0) {
-    if (col === 6) col--;
-
-    for (let i = 0; i < size; i++) {
-      const row = direction === -1 ? size - 1 - i : i;
-      if (!matrix[row][col]) {
-        if (bitIndex < bits.length) {
-          matrix[row][col] = bits[bitIndex++];
-        }
-      }
-      if (!matrix[row][col - 1] && col > 0) {
-        // skip reserved
-      }
-    }
-    col -= 2;
-    direction *= -1;
-  }
-
-  // Simple mask
-  for (let r = 0; r < size; r++) {
-    for (let c = 0; c < size; c++) {
-      if ((r + c) % 2 === 0) {
-        matrix[r][c] = !matrix[r][c];
-      }
-    }
-  }
-
-  return matrix;
-}
-
 export function QRCodeGenerator() {
   const [text, setText] = useState('https://github.com/leehyunwoo0305/Infinitex');
   const [qrSize, setQrSize] = useState(300);
@@ -218,10 +116,22 @@ export function QRCodeGenerator() {
     if (text) generate();
   }, [text, qrSize]);
 
-  const generate = () => {
+  const generate = async () => {
     if (!canvasRef.current || !text) return;
-    drawQR(canvasRef.current, text, qrSize);
-    setGenerated(true);
+    try {
+      await QRCode.toCanvas(canvasRef.current, text, {
+        width: qrSize,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#ffffff',
+        },
+        errorCorrectionLevel: 'M',
+      });
+      setGenerated(true);
+    } catch (err) {
+      console.error('QR generation failed:', err);
+    }
   };
 
   const download = () => {
@@ -234,11 +144,18 @@ export function QRCodeGenerator() {
 
   const copyImage = async () => {
     if (!canvasRef.current) return;
-    canvasRef.current.toBlob(blob => {
+    try {
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvasRef.current!.toBlob(resolve, 'image/png');
+      });
       if (blob) {
-        navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ]);
       }
-    });
+    } catch (err) {
+      console.error('Copy failed:', err);
+    }
   };
 
   return (
